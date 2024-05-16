@@ -52,6 +52,7 @@ from harmony.utils import (
     get_value_or_default,
     is_body_allowed_for_status_code,
 )
+from harmony.param_functions import Depends, Security
 from pydantic import BaseModel
 from starlette import routing
 from starlette.concurrency import run_in_threadpool
@@ -73,11 +74,11 @@ from typing_extensions import Annotated, Doc, deprecated  # type: ignore [attr-d
 
 
 def _prepare_response_content(
-    res: Any,
-    *,
-    exclude_unset: bool,
-    exclude_defaults: bool = False,
-    exclude_none: bool = False,
+        res: Any,
+        *,
+        exclude_unset: bool,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
 ) -> Any:
     if isinstance(res, BaseModel):
         read_with_orm_mode = getattr(_get_model_config(res), "read_with_orm_mode", None)
@@ -120,16 +121,16 @@ def _prepare_response_content(
 
 
 async def serialize_response(
-    *,
-    field: Optional[ModelField] = None,
-    response_content: Any,
-    include: Optional[IncEx] = None,
-    exclude: Optional[IncEx] = None,
-    by_alias: bool = True,
-    exclude_unset: bool = False,
-    exclude_defaults: bool = False,
-    exclude_none: bool = False,
-    is_coroutine: bool = True,
+        *,
+        field: Optional[ModelField] = None,
+        response_content: Any,
+        include: Optional[IncEx] = None,
+        exclude: Optional[IncEx] = None,
+        by_alias: bool = True,
+        exclude_unset: bool = False,
+        exclude_defaults: bool = False,
+        exclude_none: bool = False,
+        is_coroutine: bool = True,
 ) -> Any:
     if field:
         errors = []
@@ -181,7 +182,7 @@ async def serialize_response(
 
 
 async def run_endpoint_function(
-    *, dependant: Dependant, values: Dict[str, Any], is_coroutine: bool
+        *, dependant: Dependant, values: Dict[str, Any], is_coroutine: bool
 ) -> Any:
     # Only called by get_request_handler. Has been split into its own function to
     # facilitate profiling endpoints, since inner functions are harder to profile.
@@ -194,18 +195,18 @@ async def run_endpoint_function(
 
 
 def get_request_handler(
-    dependant: Dependant,
-    body_field: Optional[ModelField] = None,
-    status_code: Optional[int] = None,
-    response_class: Union[Type[Response], DefaultPlaceholder] = Default(JSONResponse),
-    response_field: Optional[ModelField] = None,
-    response_model_include: Optional[IncEx] = None,
-    response_model_exclude: Optional[IncEx] = None,
-    response_model_by_alias: bool = True,
-    response_model_exclude_unset: bool = False,
-    response_model_exclude_defaults: bool = False,
-    response_model_exclude_none: bool = False,
-    dependency_overrides_provider: Optional[Any] = None,
+        dependant: Dependant,
+        body_field: Optional[ModelField] = None,
+        status_code: Optional[int] = None,
+        response_class: Union[Type[Response], DefaultPlaceholder] = Default(JSONResponse),
+        response_field: Optional[ModelField] = None,
+        response_model_include: Optional[IncEx] = None,
+        response_model_exclude: Optional[IncEx] = None,
+        response_model_by_alias: bool = True,
+        response_model_exclude_unset: bool = False,
+        response_model_exclude_defaults: bool = False,
+        response_model_exclude_none: bool = False,
+        dependency_overrides_provider: Optional[Any] = None,
 ) -> Callable[[Request], Coroutine[Any, Any, Response]]:
     assert dependant.call is not None, "dependant.call must be a function"
     is_coroutine = asyncio.iscoroutinefunction(dependant.call)
@@ -310,7 +311,7 @@ def get_request_handler(
 
 
 def get_websocket_app(
-    dependant: Dependant, dependency_overrides_provider: Optional[Any] = None
+        dependant: Dependant, dependency_overrides_provider: Optional[Any] = None
 ) -> Callable[[WebSocket], Coroutine[Any, Any, Any]]:
     async def app(websocket: WebSocket) -> None:
         solved_result = await solve_dependencies(
@@ -329,13 +330,13 @@ def get_websocket_app(
 
 class APIWebSocketRoute(routing.WebSocketRoute):
     def __init__(
-        self,
-        path: str,
-        endpoint: Callable[..., Any],
-        *,
-        name: Optional[str] = None,
-        dependencies: Optional[Sequence[params.Depends]] = None,
-        dependency_overrides_provider: Optional[Any] = None,
+            self,
+            path: str,
+            endpoint: Callable[..., Any],
+            *,
+            name: Optional[str] = None,
+            dependencies: Optional[Sequence[params.Depends]] = None,
+            dependency_overrides_provider: Optional[Any] = None,
     ) -> None:
         self.path = path
         self.endpoint = endpoint
@@ -365,38 +366,38 @@ class APIWebSocketRoute(routing.WebSocketRoute):
 
 class APIRoute(routing.Route):
     def __init__(
-        self,
-        path: str,
-        endpoint: Callable[..., Any],
-        *,
-        response_model: Any = Default(None),
-        status_code: Optional[int] = None,
-        tags: Optional[List[Union[str, Enum]]] = None,
-        dependencies: Optional[Sequence[params.Depends]] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        response_description: str = "Successful Response",
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
-        deprecated: Optional[bool] = None,
-        name: Optional[str] = None,
-        methods: Optional[Union[Set[str], List[str]]] = None,
-        operation_id: Optional[str] = None,
-        response_model_include: Optional[IncEx] = None,
-        response_model_exclude: Optional[IncEx] = None,
-        response_model_by_alias: bool = True,
-        response_model_exclude_unset: bool = False,
-        response_model_exclude_defaults: bool = False,
-        response_model_exclude_none: bool = False,
-        include_in_schema: bool = True,
-        response_class: Union[Type[Response], DefaultPlaceholder] = Default(
-            JSONResponse
-        ),
-        dependency_overrides_provider: Optional[Any] = None,
-        callbacks: Optional[List[BaseRoute]] = None,
-        openapi_extra: Optional[Dict[str, Any]] = None,
-        generate_unique_id_function: Union[
-            Callable[["APIRoute"], str], DefaultPlaceholder
-        ] = Default(generate_unique_id),
+            self,
+            path: str,
+            endpoint: Callable[..., Any],
+            *,
+            response_model: Any = Default(None),
+            status_code: Optional[int] = None,
+            tags: Optional[List[Union[str, Enum]]] = None,
+            dependencies: Optional[Sequence[params.Depends]] = None,
+            summary: Optional[str] = None,
+            description: Optional[str] = None,
+            response_description: str = "Successful Response",
+            responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+            deprecated: Optional[bool] = None,
+            name: Optional[str] = None,
+            methods: Optional[Union[Set[str], List[str]]] = None,
+            operation_id: Optional[str] = None,
+            response_model_include: Optional[IncEx] = None,
+            response_model_exclude: Optional[IncEx] = None,
+            response_model_by_alias: bool = True,
+            response_model_exclude_unset: bool = False,
+            response_model_exclude_defaults: bool = False,
+            response_model_exclude_none: bool = False,
+            include_in_schema: bool = True,
+            response_class: Union[Type[Response], DefaultPlaceholder] = Default(
+                JSONResponse
+            ),
+            dependency_overrides_provider: Optional[Any] = None,
+            callbacks: Optional[List[BaseRoute]] = None,
+            openapi_extra: Optional[Dict[str, Any]] = None,
+            generate_unique_id_function: Union[
+                Callable[["APIRoute"], str], DefaultPlaceholder
+            ] = Default(generate_unique_id),
     ) -> None:
         self.path = path
         self.endpoint = endpoint
@@ -547,219 +548,219 @@ class APIRouter(routing.Router):
     """
 
     def __init__(
-        self,
-        *,
-        prefix: Annotated[str, Doc("An optional path prefix for the router.")] = "",
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to all the *path operations* in this
-                router.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to all the
-                *path operations* in this router.
-
-                Read more about it in the
-                [Harmony docs for Bigger Applications - Multiple Files](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
-                """
-            ),
-        ] = None,
-        default_response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                The default response class to be used.
-
-                Read more in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#default-response-class).
-                """
-            ),
-        ] = Default(JSONResponse),
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses to be shown in OpenAPI.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Additional Responses in OpenAPI](https://harmony.tiangolo.com/advanced/additional-responses/).
-
-                And in the
-                [Harmony docs for Bigger Applications](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                OpenAPI callbacks that should apply to all *path operations* in this
-                router.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        routes: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                **Note**: you probably shouldn't use this parameter, it is inherited
-                from Starlette and supported for compatibility.
-
-                ---
-
-                A list of routes to serve incoming HTTP and WebSocket requests.
-                """
-            ),
-            deprecated(
-                """
-                You normally wouldn't use this parameter with Harmony, it is inherited
-                from Starlette and supported for compatibility.
-
-                In Harmony, you normally would use the *path operation methods*,
-                like `router.get()`, `router.post()`, etc.
-                """
-            ),
-        ] = None,
-        redirect_slashes: Annotated[
-            bool,
-            Doc(
-                """
-                Whether to detect and redirect slashes in URLs when the client doesn't
-                use the same format.
-                """
-            ),
-        ] = True,
-        default: Annotated[
-            Optional[ASGIApp],
-            Doc(
-                """
-                Default function handler for this router. Used to handle
-                404 Not Found errors.
-                """
-            ),
-        ] = None,
-        dependency_overrides_provider: Annotated[
-            Optional[Any],
-            Doc(
-                """
-                Only used internally by Harmony to handle dependency overrides.
-
-                You shouldn't need to use it. It normally points to the `Harmony` app
-                object.
-                """
-            ),
-        ] = None,
-        route_class: Annotated[
-            Type[APIRoute],
-            Doc(
-                """
-                Custom route (*path operation*) class to be used by this router.
-
-                Read more about it in the
-                [Harmony docs for Custom Request and APIRoute class](https://harmony.tiangolo.com/how-to/custom-request-and-route/#custom-apiroute-class-in-a-router).
-                """
-            ),
-        ] = APIRoute,
-        on_startup: Annotated[
-            Optional[Sequence[Callable[[], Any]]],
-            Doc(
-                """
-                A list of startup event handler functions.
-
-                You should instead use the `lifespan` handlers.
-
-                Read more in the [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
-                """
-            ),
-        ] = None,
-        on_shutdown: Annotated[
-            Optional[Sequence[Callable[[], Any]]],
-            Doc(
-                """
-                A list of shutdown event handler functions.
-
-                You should instead use the `lifespan` handlers.
-
-                Read more in the
-                [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
-                """
-            ),
-        ] = None,
-        # the generic to Lifespan[AppType] is the type of the top level application
-        # which the router cannot know statically, so we use typing.Any
-        lifespan: Annotated[
-            Optional[Lifespan[Any]],
-            Doc(
-                """
-                A `Lifespan` context manager handler. This replaces `startup` and
-                `shutdown` functions with a single context manager.
-
-                Read more in the
-                [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark all *path operations* in this router as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                To include (or not) all the *path operations* in this router in the
-                generated OpenAPI.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            *,
+            prefix: Annotated[str, Doc("An optional path prefix for the router.")] = "",
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to all the *path operations* in this
+                    router.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to all the
+                    *path operations* in this router.
+    
+                    Read more about it in the
+                    [Harmony docs for Bigger Applications - Multiple Files](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
+                    """
+                ),
+            ] = None,
+            default_response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    The default response class to be used.
+    
+                    Read more in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#default-response-class).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses to be shown in OpenAPI.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Additional Responses in OpenAPI](https://harmony.tiangolo.com/advanced/additional-responses/).
+    
+                    And in the
+                    [Harmony docs for Bigger Applications](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    OpenAPI callbacks that should apply to all *path operations* in this
+                    router.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            routes: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    **Note**: you probably shouldn't use this parameter, it is inherited
+                    from Starlette and supported for compatibility.
+    
+                    ---
+    
+                    A list of routes to serve incoming HTTP and WebSocket requests.
+                    """
+                ),
+                deprecated(
+                    """
+                    You normally wouldn't use this parameter with Harmony, it is inherited
+                    from Starlette and supported for compatibility.
+    
+                    In Harmony, you normally would use the *path operation methods*,
+                    like `router.get()`, `router.post()`, etc.
+                    """
+                ),
+            ] = None,
+            redirect_slashes: Annotated[
+                bool,
+                Doc(
+                    """
+                    Whether to detect and redirect slashes in URLs when the client doesn't
+                    use the same format.
+                    """
+                ),
+            ] = True,
+            default: Annotated[
+                Optional[ASGIApp],
+                Doc(
+                    """
+                    Default function handler for this router. Used to handle
+                    404 Not Found errors.
+                    """
+                ),
+            ] = None,
+            dependency_overrides_provider: Annotated[
+                Optional[Any],
+                Doc(
+                    """
+                    Only used internally by Harmony to handle dependency overrides.
+    
+                    You shouldn't need to use it. It normally points to the `Harmony` app
+                    object.
+                    """
+                ),
+            ] = None,
+            route_class: Annotated[
+                Type[APIRoute],
+                Doc(
+                    """
+                    Custom route (*path operation*) class to be used by this router.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Request and APIRoute class](https://harmony.tiangolo.com/how-to/custom-request-and-route/#custom-apiroute-class-in-a-router).
+                    """
+                ),
+            ] = APIRoute,
+            on_startup: Annotated[
+                Optional[Sequence[Callable[[], Any]]],
+                Doc(
+                    """
+                    A list of startup event handler functions.
+    
+                    You should instead use the `lifespan` handlers.
+    
+                    Read more in the [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
+                    """
+                ),
+            ] = None,
+            on_shutdown: Annotated[
+                Optional[Sequence[Callable[[], Any]]],
+                Doc(
+                    """
+                    A list of shutdown event handler functions.
+    
+                    You should instead use the `lifespan` handlers.
+    
+                    Read more in the
+                    [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
+                    """
+                ),
+            ] = None,
+            # the generic to Lifespan[AppType] is the type of the top level application
+            # which the router cannot know statically, so we use typing.Any
+            lifespan: Annotated[
+                Optional[Lifespan[Any]],
+                Doc(
+                    """
+                    A `Lifespan` context manager handler. This replaces `startup` and
+                    `shutdown` functions with a single context manager.
+    
+                    Read more in the
+                    [Harmony docs for `lifespan`](https://harmony.tiangolo.com/advanced/events/).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark all *path operations* in this router as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    To include (or not) all the *path operations* in this router in the
+                    generated OpenAPI.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> None:
         super().__init__(
             routes=routes,
@@ -787,11 +788,11 @@ class APIRouter(routing.Router):
         self.generate_unique_id_function = generate_unique_id_function
 
     def route(
-        self,
-        path: str,
-        methods: Optional[List[str]] = None,
-        name: Optional[str] = None,
-        include_in_schema: bool = True,
+            self,
+            path: str,
+            methods: Optional[List[str]] = None,
+            name: Optional[str] = None,
+            include_in_schema: bool = True,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
             self.add_route(
@@ -806,38 +807,38 @@ class APIRouter(routing.Router):
         return decorator
 
     def add_api_route(
-        self,
-        path: str,
-        endpoint: Callable[..., Any],
-        *,
-        response_model: Any = Default(None),
-        status_code: Optional[int] = None,
-        tags: Optional[List[Union[str, Enum]]] = None,
-        dependencies: Optional[Sequence[params.Depends]] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        response_description: str = "Successful Response",
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
-        deprecated: Optional[bool] = None,
-        methods: Optional[Union[Set[str], List[str]]] = None,
-        operation_id: Optional[str] = None,
-        response_model_include: Optional[IncEx] = None,
-        response_model_exclude: Optional[IncEx] = None,
-        response_model_by_alias: bool = True,
-        response_model_exclude_unset: bool = False,
-        response_model_exclude_defaults: bool = False,
-        response_model_exclude_none: bool = False,
-        include_in_schema: bool = True,
-        response_class: Union[Type[Response], DefaultPlaceholder] = Default(
-            JSONResponse
-        ),
-        name: Optional[str] = None,
-        route_class_override: Optional[Type[APIRoute]] = None,
-        callbacks: Optional[List[BaseRoute]] = None,
-        openapi_extra: Optional[Dict[str, Any]] = None,
-        generate_unique_id_function: Union[
-            Callable[[APIRoute], str], DefaultPlaceholder
-        ] = Default(generate_unique_id),
+            self,
+            path: str,
+            endpoint: Callable[..., Any],
+            *,
+            response_model: Any = Default(None),
+            status_code: Optional[int] = None,
+            tags: Optional[List[Union[str, Enum]]] = None,
+            dependencies: Optional[Sequence[params.Depends]] = None,
+            summary: Optional[str] = None,
+            description: Optional[str] = None,
+            response_description: str = "Successful Response",
+            responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+            deprecated: Optional[bool] = None,
+            methods: Optional[Union[Set[str], List[str]]] = None,
+            operation_id: Optional[str] = None,
+            response_model_include: Optional[IncEx] = None,
+            response_model_exclude: Optional[IncEx] = None,
+            response_model_by_alias: bool = True,
+            response_model_exclude_unset: bool = False,
+            response_model_exclude_defaults: bool = False,
+            response_model_exclude_none: bool = False,
+            include_in_schema: bool = True,
+            response_class: Union[Type[Response], DefaultPlaceholder] = Default(
+                JSONResponse
+            ),
+            name: Optional[str] = None,
+            route_class_override: Optional[Type[APIRoute]] = None,
+            callbacks: Optional[List[BaseRoute]] = None,
+            openapi_extra: Optional[Dict[str, Any]] = None,
+            generate_unique_id_function: Union[
+                Callable[[APIRoute], str], DefaultPlaceholder
+            ] = Default(generate_unique_id),
     ) -> None:
         route_class = route_class_override or self.route_class
         responses = responses or {}
@@ -888,43 +889,50 @@ class APIRouter(routing.Router):
         self.routes.append(route)
 
     def api_route(
-        self,
-        path: str,
-        *,
-        response_model: Any = Default(None),
-        status_code: Optional[int] = None,
-        tags: Optional[List[Union[str, Enum]]] = None,
-        dependencies: Optional[Sequence[params.Depends]] = None,
-        summary: Optional[str] = None,
-        description: Optional[str] = None,
-        response_description: str = "Successful Response",
-        responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
-        deprecated: Optional[bool] = None,
-        methods: Optional[List[str]] = None,
-        operation_id: Optional[str] = None,
-        response_model_include: Optional[IncEx] = None,
-        response_model_exclude: Optional[IncEx] = None,
-        response_model_by_alias: bool = True,
-        response_model_exclude_unset: bool = False,
-        response_model_exclude_defaults: bool = False,
-        response_model_exclude_none: bool = False,
-        include_in_schema: bool = True,
-        response_class: Type[Response] = Default(JSONResponse),
-        name: Optional[str] = None,
-        callbacks: Optional[List[BaseRoute]] = None,
-        openapi_extra: Optional[Dict[str, Any]] = None,
-        generate_unique_id_function: Callable[[APIRoute], str] = Default(
-            generate_unique_id
-        ),
+            self,
+            path: str,
+            *,
+            response_model: Any = Default(None),
+            status_code: Optional[int] = None,
+            tags: Optional[List[Union[str, Enum]]] = None,
+            dependencies: Optional[Sequence[params.Depends]] = None,
+            summary: Optional[str] = None,
+            description: Optional[str] = None,
+            response_description: str = "Successful Response",
+            responses: Optional[Dict[Union[int, str], Dict[str, Any]]] = None,
+            deprecated: Optional[bool] = None,
+            methods: Optional[List[str]] = None,
+            operation_id: Optional[str] = None,
+            response_model_include: Optional[IncEx] = None,
+            response_model_exclude: Optional[IncEx] = None,
+            response_model_by_alias: bool = True,
+            response_model_exclude_unset: bool = False,
+            response_model_exclude_defaults: bool = False,
+            response_model_exclude_none: bool = False,
+            include_in_schema: bool = True,
+            response_class: Type[Response] = Default(JSONResponse),
+            name: Optional[str] = None,
+            callbacks: Optional[List[BaseRoute]] = None,
+            openapi_extra: Optional[Dict[str, Any]] = None,
+            generate_unique_id_function: Callable[[APIRoute], str] = Default(
+                generate_unique_id
+            ),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
+
+            all_depends = [] if dependencies is None else dependencies
+            if hasattr(func, "depends"):
+                func_depends = getattr(func, "depends")
+                delattr(func, "depends")
+                all_depends += func_depends
+
             self.add_api_route(
                 path,
                 func,
                 response_model=response_model,
                 status_code=status_code,
                 tags=tags,
-                dependencies=dependencies,
+                dependencies=all_depends,#dependencies,
                 summary=summary,
                 description=description,
                 response_description=response_description,
@@ -950,12 +958,12 @@ class APIRouter(routing.Router):
         return decorator
 
     def add_api_websocket_route(
-        self,
-        path: str,
-        endpoint: Callable[..., Any],
-        name: Optional[str] = None,
-        *,
-        dependencies: Optional[Sequence[params.Depends]] = None,
+            self,
+            path: str,
+            endpoint: Callable[..., Any],
+            name: Optional[str] = None,
+            *,
+            dependencies: Optional[Sequence[params.Depends]] = None,
     ) -> None:
         current_dependencies = self.dependencies.copy()
         if dependencies:
@@ -971,36 +979,36 @@ class APIRouter(routing.Router):
         self.routes.append(route)
 
     def websocket(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                WebSocket path.
-                """
-            ),
-        ],
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A name for the WebSocket. Only used internally.
-                """
-            ),
-        ] = None,
-        *,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be used for this
-                WebSocket.
-
-                Read more about it in the
-                [Harmony docs for WebSockets](https://harmony.tiangolo.com/advanced/websockets/).
-                """
-            ),
-        ] = None,
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    WebSocket path.
+                    """
+                ),
+            ],
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A name for the WebSocket. Only used internally.
+                    """
+                ),
+            ] = None,
+            *,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be used for this
+                    WebSocket.
+    
+                    Read more about it in the
+                    [Harmony docs for WebSockets](https://harmony.tiangolo.com/advanced/websockets/).
+                    """
+                ),
+            ] = None,
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Decorate a WebSocket function.
@@ -1038,7 +1046,7 @@ class APIRouter(routing.Router):
         return decorator
 
     def websocket_route(
-        self, path: str, name: Union[str, None] = None
+            self, path: str, name: Union[str, None] = None
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
             self.add_websocket_route(path, func, name=name)
@@ -1047,116 +1055,116 @@ class APIRouter(routing.Router):
         return decorator
 
     def include_router(
-        self,
-        router: Annotated["APIRouter", Doc("The `APIRouter` to include.")],
-        *,
-        prefix: Annotated[str, Doc("An optional path prefix for the router.")] = "",
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to all the *path operations* in this
-                router.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to all the
-                *path operations* in this router.
-
-                Read more about it in the
-                [Harmony docs for Bigger Applications - Multiple Files](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
-                """
-            ),
-        ] = None,
-        default_response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                The default response class to be used.
-
-                Read more in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#default-response-class).
-                """
-            ),
-        ] = Default(JSONResponse),
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses to be shown in OpenAPI.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Additional Responses in OpenAPI](https://harmony.tiangolo.com/advanced/additional-responses/).
-
-                And in the
-                [Harmony docs for Bigger Applications](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                OpenAPI callbacks that should apply to all *path operations* in this
-                router.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark all *path operations* in this router as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include (or not) all the *path operations* in this router in the
-                generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = True,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            router: Annotated["APIRouter", Doc("The `APIRouter` to include.")],
+            *,
+            prefix: Annotated[str, Doc("An optional path prefix for the router.")] = "",
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to all the *path operations* in this
+                    router.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to all the
+                    *path operations* in this router.
+    
+                    Read more about it in the
+                    [Harmony docs for Bigger Applications - Multiple Files](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
+                    """
+                ),
+            ] = None,
+            default_response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    The default response class to be used.
+    
+                    Read more in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#default-response-class).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses to be shown in OpenAPI.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Additional Responses in OpenAPI](https://harmony.tiangolo.com/advanced/additional-responses/).
+    
+                    And in the
+                    [Harmony docs for Bigger Applications](https://harmony.tiangolo.com/tutorial/bigger-applications/#include-an-apirouter-with-a-custom-prefix-tags-responses-and-dependencies).
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    OpenAPI callbacks that should apply to all *path operations* in this
+                    router.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark all *path operations* in this router as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include (or not) all the *path operations* in this router in the
+                    generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = True,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> None:
         """
         Include another `APIRouter` in the same current `APIRouter`.
@@ -1247,8 +1255,8 @@ class APIRouter(routing.Router):
                     response_model_exclude_defaults=route.response_model_exclude_defaults,
                     response_model_exclude_none=route.response_model_exclude_none,
                     include_in_schema=route.include_in_schema
-                    and self.include_in_schema
-                    and include_in_schema,
+                                      and self.include_in_schema
+                                      and include_in_schema,
                     response_class=use_response_class,
                     name=route.name,
                     route_class_override=type(route),
@@ -1287,336 +1295,336 @@ class APIRouter(routing.Router):
             self.add_event_handler("shutdown", handler)
 
     def get(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP GET operation.
@@ -1664,336 +1672,336 @@ class APIRouter(routing.Router):
         )
 
     def put(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP PUT operation.
@@ -2046,336 +2054,336 @@ class APIRouter(routing.Router):
         )
 
     def post(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP POST operation.
@@ -2428,336 +2436,336 @@ class APIRouter(routing.Router):
         )
 
     def delete(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP DELETE operation.
@@ -2805,336 +2813,336 @@ class APIRouter(routing.Router):
         )
 
     def options(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP OPTIONS operation.
@@ -3182,336 +3190,336 @@ class APIRouter(routing.Router):
         )
 
     def head(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP HEAD operation.
@@ -3564,336 +3572,336 @@ class APIRouter(routing.Router):
         )
 
     def patch(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP PATCH operation.
@@ -3946,336 +3954,336 @@ class APIRouter(routing.Router):
         )
 
     def trace(
-        self,
-        path: Annotated[
-            str,
-            Doc(
-                """
-                The URL path to be used for this *path operation*.
-
-                For example, in `http://example.com/items`, the path is `/items`.
-                """
-            ),
-        ],
-        *,
-        response_model: Annotated[
-            Any,
-            Doc(
-                """
-                The type to use for the response.
-
-                It could be any valid Pydantic *field* type. So, it doesn't have to
-                be a Pydantic model, it could be other things, like a `list`, `dict`,
-                etc.
-
-                It will be used for:
-
-                * Documentation: the generated OpenAPI (and the UI at `/docs`) will
-                    show it as the response (JSON Schema).
-                * Serialization: you could return an arbitrary object and the
-                    `response_model` would be used to serialize that object into the
-                    corresponding JSON.
-                * Filtering: the JSON sent to the client will only contain the data
-                    (fields) defined in the `response_model`. If you returned an object
-                    that contains an attribute `password` but the `response_model` does
-                    not include that field, the JSON sent to the client would not have
-                    that `password`.
-                * Validation: whatever you return will be serialized with the
-                    `response_model`, converting any data as necessary to generate the
-                    corresponding JSON. But if the data in the object returned is not
-                    valid, that would mean a violation of the contract with the client,
-                    so it's an error from the API developer. So, Harmony will raise an
-                    error and return a 500 error code (Internal Server Error).
-
-                Read more about it in the
-                [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
-                """
-            ),
-        ] = Default(None),
-        status_code: Annotated[
-            Optional[int],
-            Doc(
-                """
-                The default status code to be used for the response.
-
-                You could override the status code by returning a response directly.
-
-                Read more about it in the
-                [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
-                """
-            ),
-        ] = None,
-        tags: Annotated[
-            Optional[List[Union[str, Enum]]],
-            Doc(
-                """
-                A list of tags to be applied to the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
-                """
-            ),
-        ] = None,
-        dependencies: Annotated[
-            Optional[Sequence[params.Depends]],
-            Doc(
-                """
-                A list of dependencies (using `Depends()`) to be applied to the
-                *path operation*.
-
-                Read more about it in the
-                [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
-                """
-            ),
-        ] = None,
-        summary: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A summary for the *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        description: Annotated[
-            Optional[str],
-            Doc(
-                """
-                A description for the *path operation*.
-
-                If not provided, it will be extracted automatically from the docstring
-                of the *path operation function*.
-
-                It can contain Markdown.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
-                """
-            ),
-        ] = None,
-        response_description: Annotated[
-            str,
-            Doc(
-                """
-                The description for the default response.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = "Successful Response",
-        responses: Annotated[
-            Optional[Dict[Union[int, str], Dict[str, Any]]],
-            Doc(
-                """
-                Additional responses that could be returned by this *path operation*.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        deprecated: Annotated[
-            Optional[bool],
-            Doc(
-                """
-                Mark this *path operation* as deprecated.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-                """
-            ),
-        ] = None,
-        operation_id: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Custom operation ID to be used by this *path operation*.
-
-                By default, it is generated automatically.
-
-                If you provide a custom operation ID, you need to make sure it is
-                unique for the whole API.
-
-                You can customize the
-                operation ID generation with the parameter
-                `generate_unique_id_function` in the `Harmony` class.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = None,
-        response_model_include: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to include only certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_exclude: Annotated[
-            Optional[IncEx],
-            Doc(
-                """
-                Configuration passed to Pydantic to exclude certain fields in the
-                response data.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = None,
-        response_model_by_alias: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response model
-                should be serialized by alias when an alias is used.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
-                """
-            ),
-        ] = True,
-        response_model_exclude_unset: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that were not set and
-                have their default values. This is different from
-                `response_model_exclude_defaults` in that if the fields are set,
-                they will be included in the response, even if the value is the same
-                as the default.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_defaults: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data
-                should have all the fields, including the ones that have the same value
-                as the default. This is different from `response_model_exclude_unset`
-                in that if the fields are set but contain the same default values,
-                they will be excluded from the response.
-
-                When `True`, default values are omitted from the response.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
-                """
-            ),
-        ] = False,
-        response_model_exclude_none: Annotated[
-            bool,
-            Doc(
-                """
-                Configuration passed to Pydantic to define if the response data should
-                exclude fields set to `None`.
-
-                This is much simpler (less smart) than `response_model_exclude_unset`
-                and `response_model_exclude_defaults`. You probably want to use one of
-                those two instead of this one, as those allow returning `None` values
-                when it makes sense.
-
-                Read more about it in the
-                [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
-                """
-            ),
-        ] = False,
-        include_in_schema: Annotated[
-            bool,
-            Doc(
-                """
-                Include this *path operation* in the generated OpenAPI schema.
-
-                This affects the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
-                """
-            ),
-        ] = True,
-        response_class: Annotated[
-            Type[Response],
-            Doc(
-                """
-                Response class to be used for this *path operation*.
-
-                This will not be used if you return a response directly.
-
-                Read more about it in the
-                [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
-                """
-            ),
-        ] = Default(JSONResponse),
-        name: Annotated[
-            Optional[str],
-            Doc(
-                """
-                Name for this *path operation*. Only used internally.
-                """
-            ),
-        ] = None,
-        callbacks: Annotated[
-            Optional[List[BaseRoute]],
-            Doc(
-                """
-                List of *path operations* that will be used as OpenAPI callbacks.
-
-                This is only for OpenAPI documentation, the callbacks won't be used
-                directly.
-
-                It will be added to the generated OpenAPI (e.g. visible at `/docs`).
-
-                Read more about it in the
-                [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
-                """
-            ),
-        ] = None,
-        openapi_extra: Annotated[
-            Optional[Dict[str, Any]],
-            Doc(
-                """
-                Extra metadata to be included in the OpenAPI schema for this *path
-                operation*.
-
-                Read more about it in the
-                [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
-                """
-            ),
-        ] = None,
-        generate_unique_id_function: Annotated[
-            Callable[[APIRoute], str],
-            Doc(
-                """
-                Customize the function used to generate unique IDs for the *path
-                operations* shown in the generated OpenAPI.
-
-                This is particularly useful when automatically generating clients or
-                SDKs for your API.
-
-                Read more about it in the
-                [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
-                """
-            ),
-        ] = Default(generate_unique_id),
+            self,
+            path: Annotated[
+                str,
+                Doc(
+                    """
+                    The URL path to be used for this *path operation*.
+    
+                    For example, in `http://example.com/items`, the path is `/items`.
+                    """
+                ),
+            ],
+            *,
+            response_model: Annotated[
+                Any,
+                Doc(
+                    """
+                    The type to use for the response.
+    
+                    It could be any valid Pydantic *field* type. So, it doesn't have to
+                    be a Pydantic model, it could be other things, like a `list`, `dict`,
+                    etc.
+    
+                    It will be used for:
+    
+                    * Documentation: the generated OpenAPI (and the UI at `/docs`) will
+                        show it as the response (JSON Schema).
+                    * Serialization: you could return an arbitrary object and the
+                        `response_model` would be used to serialize that object into the
+                        corresponding JSON.
+                    * Filtering: the JSON sent to the client will only contain the data
+                        (fields) defined in the `response_model`. If you returned an object
+                        that contains an attribute `password` but the `response_model` does
+                        not include that field, the JSON sent to the client would not have
+                        that `password`.
+                    * Validation: whatever you return will be serialized with the
+                        `response_model`, converting any data as necessary to generate the
+                        corresponding JSON. But if the data in the object returned is not
+                        valid, that would mean a violation of the contract with the client,
+                        so it's an error from the API developer. So, Harmony will raise an
+                        error and return a 500 error code (Internal Server Error).
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model](https://harmony.tiangolo.com/tutorial/response-model/).
+                    """
+                ),
+            ] = Default(None),
+            status_code: Annotated[
+                Optional[int],
+                Doc(
+                    """
+                    The default status code to be used for the response.
+    
+                    You could override the status code by returning a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Status Code](https://harmony.tiangolo.com/tutorial/response-status-code/).
+                    """
+                ),
+            ] = None,
+            tags: Annotated[
+                Optional[List[Union[str, Enum]]],
+                Doc(
+                    """
+                    A list of tags to be applied to the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/#tags).
+                    """
+                ),
+            ] = None,
+            dependencies: Annotated[
+                Optional[Sequence[params.Depends]],
+                Doc(
+                    """
+                    A list of dependencies (using `Depends()`) to be applied to the
+                    *path operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Dependencies in path operation decorators](https://harmony.tiangolo.com/tutorial/dependencies/dependencies-in-path-operation-decorators/).
+                    """
+                ),
+            ] = None,
+            summary: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A summary for the *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            description: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    A description for the *path operation*.
+    
+                    If not provided, it will be extracted automatically from the docstring
+                    of the *path operation function*.
+    
+                    It can contain Markdown.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Configuration](https://harmony.tiangolo.com/tutorial/path-operation-configuration/).
+                    """
+                ),
+            ] = None,
+            response_description: Annotated[
+                str,
+                Doc(
+                    """
+                    The description for the default response.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = "Successful Response",
+            responses: Annotated[
+                Optional[Dict[Union[int, str], Dict[str, Any]]],
+                Doc(
+                    """
+                    Additional responses that could be returned by this *path operation*.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            deprecated: Annotated[
+                Optional[bool],
+                Doc(
+                    """
+                    Mark this *path operation* as deprecated.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+                    """
+                ),
+            ] = None,
+            operation_id: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Custom operation ID to be used by this *path operation*.
+    
+                    By default, it is generated automatically.
+    
+                    If you provide a custom operation ID, you need to make sure it is
+                    unique for the whole API.
+    
+                    You can customize the
+                    operation ID generation with the parameter
+                    `generate_unique_id_function` in the `Harmony` class.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = None,
+            response_model_include: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to include only certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_exclude: Annotated[
+                Optional[IncEx],
+                Doc(
+                    """
+                    Configuration passed to Pydantic to exclude certain fields in the
+                    response data.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = None,
+            response_model_by_alias: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response model
+                    should be serialized by alias when an alias is used.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_include-and-response_model_exclude).
+                    """
+                ),
+            ] = True,
+            response_model_exclude_unset: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that were not set and
+                    have their default values. This is different from
+                    `response_model_exclude_defaults` in that if the fields are set,
+                    they will be included in the response, even if the value is the same
+                    as the default.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_defaults: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data
+                    should have all the fields, including the ones that have the same value
+                    as the default. This is different from `response_model_exclude_unset`
+                    in that if the fields are set but contain the same default values,
+                    they will be excluded from the response.
+    
+                    When `True`, default values are omitted from the response.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#use-the-response_model_exclude_unset-parameter).
+                    """
+                ),
+            ] = False,
+            response_model_exclude_none: Annotated[
+                bool,
+                Doc(
+                    """
+                    Configuration passed to Pydantic to define if the response data should
+                    exclude fields set to `None`.
+    
+                    This is much simpler (less smart) than `response_model_exclude_unset`
+                    and `response_model_exclude_defaults`. You probably want to use one of
+                    those two instead of this one, as those allow returning `None` values
+                    when it makes sense.
+    
+                    Read more about it in the
+                    [Harmony docs for Response Model - Return Type](https://harmony.tiangolo.com/tutorial/response-model/#response_model_exclude_none).
+                    """
+                ),
+            ] = False,
+            include_in_schema: Annotated[
+                bool,
+                Doc(
+                    """
+                    Include this *path operation* in the generated OpenAPI schema.
+    
+                    This affects the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for Query Parameters and String Validations](https://harmony.tiangolo.com/tutorial/query-params-str-validations/#exclude-from-openapi).
+                    """
+                ),
+            ] = True,
+            response_class: Annotated[
+                Type[Response],
+                Doc(
+                    """
+                    Response class to be used for this *path operation*.
+    
+                    This will not be used if you return a response directly.
+    
+                    Read more about it in the
+                    [Harmony docs for Custom Response - HTML, Stream, File, others](https://harmony.tiangolo.com/advanced/custom-response/#redirectresponse).
+                    """
+                ),
+            ] = Default(JSONResponse),
+            name: Annotated[
+                Optional[str],
+                Doc(
+                    """
+                    Name for this *path operation*. Only used internally.
+                    """
+                ),
+            ] = None,
+            callbacks: Annotated[
+                Optional[List[BaseRoute]],
+                Doc(
+                    """
+                    List of *path operations* that will be used as OpenAPI callbacks.
+    
+                    This is only for OpenAPI documentation, the callbacks won't be used
+                    directly.
+    
+                    It will be added to the generated OpenAPI (e.g. visible at `/docs`).
+    
+                    Read more about it in the
+                    [Harmony docs for OpenAPI Callbacks](https://harmony.tiangolo.com/advanced/openapi-callbacks/).
+                    """
+                ),
+            ] = None,
+            openapi_extra: Annotated[
+                Optional[Dict[str, Any]],
+                Doc(
+                    """
+                    Extra metadata to be included in the OpenAPI schema for this *path
+                    operation*.
+    
+                    Read more about it in the
+                    [Harmony docs for Path Operation Advanced Configuration](https://harmony.tiangolo.com/advanced/path-operation-advanced-configuration/#custom-openapi-path-operation-schema).
+                    """
+                ),
+            ] = None,
+            generate_unique_id_function: Annotated[
+                Callable[[APIRoute], str],
+                Doc(
+                    """
+                    Customize the function used to generate unique IDs for the *path
+                    operations* shown in the generated OpenAPI.
+    
+                    This is particularly useful when automatically generating clients or
+                    SDKs for your API.
+    
+                    Read more about it in the
+                    [Harmony docs about how to Generate Clients](https://harmony.tiangolo.com/advanced/generate-clients/#custom-generate-unique-id-function).
+                    """
+                ),
+            ] = Default(generate_unique_id),
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add a *path operation* using an HTTP TRACE operation.
@@ -4336,15 +4344,15 @@ class APIRouter(routing.Router):
         """
     )
     def on_event(
-        self,
-        event_type: Annotated[
-            str,
-            Doc(
-                """
-                The type of event. `startup` or `shutdown`.
-                """
-            ),
-        ],
+            self,
+            event_type: Annotated[
+                str,
+                Doc(
+                    """
+                    The type of event. `startup` or `shutdown`.
+                    """
+                ),
+            ],
     ) -> Callable[[DecoratedCallable], DecoratedCallable]:
         """
         Add an event handler for the router.
@@ -4357,6 +4365,79 @@ class APIRouter(routing.Router):
 
         def decorator(func: DecoratedCallable) -> DecoratedCallable:
             self.add_event_handler(event_type, func)
+            return func
+
+        return decorator
+
+    def depend(self, depends: Optional[Sequence[Callable]]) -> Callable:
+        """
+        认证
+        :return:
+        """
+        auth_classes = [] if depends is None else [Depends(item) for item in depends]
+
+        def decorator(func: DecoratedCallable) -> DecoratedCallable:
+            def wrapper(*args, **kwargs):
+                kwargs["dependencies"] = auth_classes if kwargs["dependencies"] is None \
+                    else auth_classes + kwargs["dependencies"]
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
+    def authentication(self, auth_classes: Optional[Sequence[Callable]]) -> Callable:
+        """
+        认证
+        :return:
+        """
+        return self.depend(auth_classes)
+
+    def throttle(self, throttle_classes: Optional[Sequence[Callable]]) -> Callable:
+        """
+        限流
+        :return:
+        """
+        return self.depend(throttle_classes)
+
+    def permission(self, permission_classes: Optional[Sequence[Callable]]) -> Callable:
+        """
+        权限
+        :return:
+        """
+        return self.depend(permission_classes)
+
+    def record(self, record_classes: Optional[Sequence[Callable]]) -> Callable:
+        """
+        认证
+        :return:
+        """
+        return self.depend(record_classes)
+
+    def depend2(self, depends: Optional[Sequence[Callable]]) -> Callable:
+        """
+        认证
+        :return:
+        """
+        auth_classes = [] if depends is None else [Depends(item) for item in depends]
+
+        def decorator(func: DecoratedCallable) -> DecoratedCallable:
+            def wrapper(*args, **kwargs):
+                kwargs["dependencies"] = auth_classes if kwargs["dependencies"] is None \
+                    else auth_classes + kwargs["dependencies"]
+                return func(*args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
+    def auth(self, depends: Sequence[Callable], *,
+             scopes: Optional[Sequence[str]] = None,
+             use_cache: bool = True,
+             ) -> Callable:
+
+        def decorator(func: DecoratedCallable) -> DecoratedCallable:
+            func.depends = [Security(item, scopes=scopes, use_cache=use_cache) for item in depends]
             return func
 
         return decorator

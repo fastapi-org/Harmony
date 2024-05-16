@@ -7,6 +7,14 @@
 from harmony import Harmony
 import uvicorn
 
+def haha():
+    print(123)
+
+def xx(func):
+    print(func.__name__)
+    print(321)
+
+xx(haha)
 app = Harmony()
 
 
@@ -16,4 +24,4 @@ def read_root():
 
 
 if __name__ == "__main__":
-    uvicorn.run("hello:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("hello:app", host="0.0.0.0", port=8000, reload=True)

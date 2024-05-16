@@ -1,2 +1,8 @@
 .idea/
+harmony_admin/
+harmony_cli/
+harmony_orm/
+harmony_scheduler/
+harmony_system/
+harmony_fullstack_demo/
 mytest/
